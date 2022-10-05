@@ -1,5 +1,5 @@
 # Dynamic Difficulty based Float
-This repository contains 2 Unity scripts.
+This repository offers a solution to make adjusting difficulties in Unity a bit easier.
 
 ## FloatGrade.cs
 - FloatGrade is a struct that holds a dictionary filled with one value for each defined Difficulty.
