@@ -9,10 +9,10 @@ Use the extension method from ```DifficultyExtension``` and call ```SetDifficult
 a FloatGrade field. Afterwards every FloatGrade field will be automaticially changed to the new difficulty, which makes it easier to adjust all FloatGrades at the same time.
 
 ### Example of a collaped Field: <br />
-![Collapsed Property](https://sperlich.at/assets/pictures/FloatGrade_preview_1.png?raw=true)
+![Collapsed Property](https://sperlich.at/assets/pictures/FloatGrade_preview_1.png?raw=true) <br />
 
 ### Example of an expanded Field: <br />
-![Expanded Property](https://sperlich.at/assets/pictures/FloatGrade_preview_2.png?raw=true)
+![Expanded Property](https://sperlich.at/assets/pictures/FloatGrade_preview_2.png?raw=true) <br />
 The current selected difficulty will be highlighted in color. You change it with the dropdown right next to it.
 The disabled field shows what Value would be returned at the moment.
 
