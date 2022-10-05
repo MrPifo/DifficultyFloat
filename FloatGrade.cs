@@ -2,27 +2,24 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 [Serializable]
 public class FloatGrade {
 
+	[SerializeField]
 	public Difficulty _difficulty;
-	public List<ValuePair> _values;
+	[SerializeField]
+	public List<ValuePair> _values = new List<ValuePair>();
 
 	/// <summary>
 	/// Returns the selected value.
 	/// </summary>
 	public float Value {
 		get {
-			if(_values == null || _values.Count == 0) {
-				Reset();
-			}
-			if(_values.Exists(d => d.difficulty == _difficulty)) {
-				return GetValue(_difficulty);
-			}
-			Debug.LogWarning("No value found for: " + _difficulty);
-			return 0;
-		}
+			CheckAndAdd(_difficulty);
+            return GetValue(_difficulty);
+        }
 	}
 	public Difficulty Difficulty => _difficulty;
 	public int IntValue => (int)Value;
@@ -33,23 +30,32 @@ public class FloatGrade {
 	/// <param name="difficulty"></param>
 	/// <param name="value"></param>
 	public void SetValue(Difficulty difficulty, float value) {
+		CheckAndAdd(difficulty);
         ValuePair pair = _values.Find(p => p.difficulty == difficulty);
 		pair.value = value;
         int index = _values.FindIndex(0, _values.Count, p => p.difficulty == difficulty);
         _values[index] = pair;
     } 
 	public float GetValue(Difficulty difficulty) {
-		if (_values.Exists(d => d.difficulty == difficulty)) {
-			return _values.Where(d => d.difficulty == difficulty).First().value;
-		}
-		Debug.LogWarning("No value found for: " + _difficulty);
-		return 0;
-	}
+		CheckAndAdd(difficulty);
+        return _values.Where(d => d.difficulty == difficulty).First().value;
+    }
 	/// <summary>
 	/// Change the selected Difficulty.
 	/// </summary>
 	/// <param name="difficulty"></param>
 	public void SetDifficulty(Difficulty difficulty) => _difficulty = difficulty;
+	private void CheckAndAdd(Difficulty diff) {
+		if(_values == null) {
+			_values = new List<ValuePair>();
+		}
+		if(_values.Exists(p => p.difficulty == diff) == false) {
+			_values.Add(new ValuePair() {
+				difficulty = diff,
+				value = 0
+			});
+		}
+	}
 	public void Reset() {
 		_values = new List<ValuePair>();
         foreach (Difficulty val in Enum.GetValues(typeof(Difficulty))) {

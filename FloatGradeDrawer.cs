@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(FloatGrade))]
+[CustomPropertyDrawer(typeof(FloatGrade), true)]
 public class FloatGradePropertyDrawer : PropertyDrawer {
 
     public bool showExtraProps;
@@ -12,6 +12,7 @@ public class FloatGradePropertyDrawer : PropertyDrawer {
     private const float fieldPadding = 20;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+        Undo.RecordObject(property.serializedObject.targetObject, "Changed FloatGrade.");
         EditorGUI.BeginProperty(position, label, property);
         var field = (FloatGrade)fieldInfo.GetValue(property.serializedObject.targetObject);
 
@@ -40,6 +41,7 @@ public class FloatGradePropertyDrawer : PropertyDrawer {
 
                 EditorGUI.LabelField(labelRect, diff.ToString());
                 field.SetValue(diff, EditorGUI.FloatField(diffRect, field.GetValue(diff)));
+                EditorUtility.SetDirty(property.serializedObject.targetObject);
 
                 if (diff == field.Difficulty) {
                     EditorGUI.DrawRect(diffRect, focusColor);
