@@ -1,110 +1,78 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
-using static CampaignV1;
+using System.Collections.Generic;
 
 [Serializable]
-public struct FloatGrade {
+public class FloatGrade {
 
-	/// <summary>
-	/// Normal Difficulty is treated as default
-	/// </summary>
-	[SerializeField]
 	private Difficulty _difficulty;
-
-	[SerializeField]
-	private float value;
-
-	[SerializeField]
-	private float easyOverride;
-	[SerializeField]
-	private float hardOverride;
-	[SerializeField]
-	private float originalOverride;
+	private readonly Dictionary<Difficulty, float> _values;
 
 	/// <summary>
-	/// Current value is determined by the current difficulty
-	/// <para>Difficulty.Medium is treated as default</para>
+	/// Returns the selected value.
 	/// </summary>
-	[SerializeField]
 	public float Value {
 		get {
-			switch(_difficulty) {
-				case Difficulty.Easy:
-					return easyOverride == 0 ? value : easyOverride;
-				case Difficulty.Hard:
-					return hardOverride == 0 ? value : hardOverride;
-				case Difficulty.Extreme:
-					return originalOverride == 0 ? value : originalOverride;
+			if(_values.ContainsKey(_difficulty)) {
+				return _values[_difficulty];
 			}
-			return value;
+			Debug.LogWarning("No value found for: " + _difficulty);
+			return 0;
 		}
-		set => this.value = value;
 	}
+	public Difficulty Difficulty => _difficulty;
 	public int IntValue => (int)Value;
 
+	/// <summary>
+	/// Changes the corresponding value of the difficulty.
+	/// </summary>
+	/// <param name="difficulty"></param>
+	/// <param name="value"></param>
+	public void SetValue(Difficulty difficulty, float value) {
+		if (_values.ContainsKey(difficulty)) {
+			_values[difficulty] = value;
+		}
+		Debug.LogWarning("No value found for: " + _difficulty);
+	} 
+	public float GetValue(Difficulty difficulty) {
+		if (_values.ContainsKey(difficulty)) {
+			return _values[difficulty];
+		}
+		Debug.LogWarning("No value found for: " + _difficulty);
+		return 0;
+	}
+	/// <summary>
+	/// Change the selected Difficulty.
+	/// </summary>
+	/// <param name="difficulty"></param>
 	public void SetDifficulty(Difficulty difficulty) => _difficulty = difficulty;
 
-	public FloatGrade(Difficulty diff = Difficulty.Normal) {
-		value = 0;
+	public FloatGrade(Difficulty diff = 0) {
 		_difficulty = diff;
-		easyOverride = 0;
-		hardOverride = 0;
-		originalOverride = 0;
-	}
-	public FloatGrade(float value, Difficulty diff = Difficulty.Normal) {
-		this.value = value;
-		_difficulty = diff;
-		easyOverride = 0;
-		hardOverride = 0;
-		originalOverride = 0;
+		_values = new Dictionary<Difficulty, float>();
+
+		foreach(Difficulty val in Enum.GetValues(typeof(Difficulty))) {
+			_values.Add(val, 0);
+		}
 	}
 
 	public static implicit operator float(FloatGrade other) => other.Value;
 }
-#if UNITY_EDITOR
-[CustomPropertyDrawer(typeof(FloatGrade))]
-public class FloatGradePropertyDrawer : PropertyDrawer {
 
-	public bool showExtraProps;
-
-	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-		EditorGUI.BeginProperty(position, label, property);
-
-		// Draw label
-		position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
-		position.width -= 75;
-
-		// Calculate rects
-		var baseValueRect = new Rect(position.x - 15, position.y, position.width, 20);
-		var easyRect = new Rect(position.x, position.y + 45, position.width, 20);
-		var hardRect = new Rect(position.x, position.y + 67, position.width, 20);
-		var originalRect = new Rect(position.x, position.y + 89, position.width, 20);
-
-		showExtraProps = EditorGUI.Foldout(baseValueRect, showExtraProps, GUIContent.none);
-		baseValueRect.x += 15;
-		EditorGUI.PropertyField(baseValueRect, property.FindPropertyRelative("value"), GUIContent.none);
-
-		if(showExtraProps) {
-			EditorGUI.indentLevel += 4;
-			EditorGUI.LabelField(new Rect(easyRect.x - 50, easyRect.y, easyRect.width, easyRect.height), "Easy");
-			EditorGUI.LabelField(new Rect(hardRect.x - 50, hardRect.y, hardRect.width, hardRect.height), "Hard");
-			EditorGUI.LabelField(new Rect(originalRect.x - 50, originalRect.y, originalRect.width, originalRect.height), "Original");
-			EditorGUI.LabelField(new Rect(easyRect.x - 50, easyRect.y - 25, easyRect.width, easyRect.height), "Current:  " + ((Difficulty)property.FindPropertyRelative("_difficulty").enumValueIndex));
-			EditorGUI.PropertyField(easyRect, property.FindPropertyRelative("easyOverride"), GUIContent.none);
-			EditorGUI.PropertyField(hardRect, property.FindPropertyRelative("hardOverride"), GUIContent.none);
-			EditorGUI.PropertyField(originalRect, property.FindPropertyRelative("originalOverride"), GUIContent.none);
-		}
-		EditorGUI.EndProperty();
-		EditorGUI.indentLevel = 0;
-	}
-
-	public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-		if(showExtraProps) {
-			return 115;
-		} else {
-			return 20;
+public static class DifficultyExtension {
+	/// <summary>
+	/// Set all FloatGrade structs in this class to the given Difficulty. <para></para> This is a shortcut instead of calling every field and changing the difficulty manually.
+	/// </summary>
+	/// <param name="mono"></param>
+	/// <param name="difficulty"></param>
+	public static void SetDifficulty(this UnityEngine.Object mono, Difficulty difficulty) {
+		var type = mono.GetType();
+		foreach (var v in type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)) {
+			if (v.FieldType == typeof(FloatGrade)) {
+				var field = (FloatGrade)v.GetValue(mono);
+				field.SetDifficulty(difficulty);
+				v.SetValue(mono, field);
+			}
 		}
 	}
 }
-#endif
