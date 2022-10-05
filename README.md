@@ -2,10 +2,10 @@
 This repository contains 2 Unity scripts.
 
 ## FloatGrade.cs
-FloatGrade is a struct that holds a dictionary filled with one value for each defined Difficulty.
-```FloatGrade.Value``` returns the currently selected difficulty float value.
-Use ```FloatGrade.SetDifficulty(difficulty)``` to change the selected difficulty.
-Use the extension method from ```DifficultyExtension``` and call ```SetDifficulty(this UnityEngine.Object mono, Difficulty difficulty)``` on any Object that contains
+- FloatGrade is a struct that holds a dictionary filled with one value for each defined Difficulty.
+- ```FloatGrade.Value``` returns the currently selected difficulty float value.
+- Use ```FloatGrade.SetDifficulty(difficulty)``` to change the selected difficulty.
+- Use the extension method from ```DifficultyExtension``` and call ```SetDifficulty(this UnityEngine.Object mono, Difficulty difficulty)``` on any Object that contains
 a FloatGrade field. Afterwards every FloatGrade field will be automaticially changed to the new difficulty, which makes it easier to adjust all FloatGrades at the same time.
 
 ### Example of a collaped Field: <br />
