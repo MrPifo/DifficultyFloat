@@ -35,7 +35,7 @@ public class FloatGrade {
 	public void SetValue(Difficulty difficulty, float value) {
         ValuePair pair = _values.Find(p => p.difficulty == difficulty);
 		pair.value = value;
-        int index = _values.IndexOf(pair);
+        int index = _values.FindIndex(0, _values.Count, p => p.difficulty == difficulty);
         _values[index] = pair;
     } 
 	public float GetValue(Difficulty difficulty) {
