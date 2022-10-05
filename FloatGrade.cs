@@ -1,20 +1,24 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 [Serializable]
 public class FloatGrade {
 
-	private Difficulty _difficulty;
-	private readonly Dictionary<Difficulty, float> _values;
+	public Difficulty _difficulty;
+	public List<ValuePair> _values;
 
 	/// <summary>
 	/// Returns the selected value.
 	/// </summary>
 	public float Value {
 		get {
-			if(_values.ContainsKey(_difficulty)) {
-				return _values[_difficulty];
+			if(_values == null || _values.Count == 0) {
+				Reset();
+			}
+			if(_values.Exists(d => d.difficulty == _difficulty)) {
+				return GetValue(_difficulty);
 			}
 			Debug.LogWarning("No value found for: " + _difficulty);
 			return 0;
@@ -29,14 +33,14 @@ public class FloatGrade {
 	/// <param name="difficulty"></param>
 	/// <param name="value"></param>
 	public void SetValue(Difficulty difficulty, float value) {
-		if (_values.ContainsKey(difficulty)) {
-			_values[difficulty] = value;
-		}
-		Debug.LogWarning("No value found for: " + _difficulty);
-	} 
+        ValuePair pair = _values.Find(p => p.difficulty == difficulty);
+		pair.value = value;
+        int index = _values.IndexOf(pair);
+        _values[index] = pair;
+    } 
 	public float GetValue(Difficulty difficulty) {
-		if (_values.ContainsKey(difficulty)) {
-			return _values[difficulty];
+		if (_values.Exists(d => d.difficulty == difficulty)) {
+			return _values.Where(d => d.difficulty == difficulty).First().value;
 		}
 		Debug.LogWarning("No value found for: " + _difficulty);
 		return 0;
@@ -46,17 +50,29 @@ public class FloatGrade {
 	/// </summary>
 	/// <param name="difficulty"></param>
 	public void SetDifficulty(Difficulty difficulty) => _difficulty = difficulty;
+	public void Reset() {
+		_values = new List<ValuePair>();
+        foreach (Difficulty val in Enum.GetValues(typeof(Difficulty))) {
+            _values.Add(new ValuePair() {
+                difficulty = val,
+                value = 0,
+            });
+        }
+    }
 
 	public FloatGrade(Difficulty diff = 0) {
 		_difficulty = diff;
-		_values = new Dictionary<Difficulty, float>();
+		_values = new List<ValuePair>();
 
-		foreach(Difficulty val in Enum.GetValues(typeof(Difficulty))) {
-			_values.Add(val, 0);
-		}
+		Reset();
 	}
-
 	public static implicit operator float(FloatGrade other) => other.Value;
+
+	[Serializable]
+	public struct ValuePair {
+		public Difficulty difficulty;
+		public float value;
+	}
 }
 
 public static class DifficultyExtension {
